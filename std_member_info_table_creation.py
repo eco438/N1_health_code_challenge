@@ -94,7 +94,7 @@ def getMemberBreakdownByPayer(cursor):
     return cursor.execute("SELECT payer, COUNT(member_first_name) FROM (select DISTINCT member_first_name, member_last_name, date_of_birth,main_address,city,state,zip_code, payer from std_member_info) GROUP BY payer").fetchall()
 
 def getMembersWithAFoodAccessScoreLowerThanTwoCount(cursor):
-    return cursor.execute("SELECT COUNT(member_id) from (SELECT  *, food_access_score from std_member_info left join model_scores_by_zip on zip_code = zcta Where food_access_score < 2 group by member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code, payer ) ").fetchone()[0]
+    return cursor.execute("SELECT COUNT(member_first_name) from (SELECT  DISTINCT member_first_name, member_last_name, date_of_birth,main_address,city,state,zip_code, payer, food_access_score from std_member_info left join model_scores_by_zip on zip_code = zcta Where food_access_score < 2 ) ").fetchone()[0]
 
 def getAverageSocialIsolationScore(cursor):
     return cursor.execute("SELECT AVG(social_isolation_score) from (SELECT  *, social_isolation_score as social_isolation_score from std_member_info left join model_scores_by_zip on zip_code =zcta group by member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code, payer )  ").fetchone()[0]
