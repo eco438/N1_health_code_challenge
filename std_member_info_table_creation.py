@@ -44,7 +44,7 @@ class StdMemberInfoTableCreate:
         self.cursor.execute(sql)
     
     def insertData(self,table,tableCursor):
-        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where ( DATE(eligibility_end_date,'+1 day')  >= '2022-04-01' and  DATE(eligibility_start_date,'+1 day') < '2022-05-01') or (DATE(substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 4, 2) || '-' || substr(eligibility_end_date, 1, 2),'+1 day')  >= '2022-04-01' and DATE(substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 4, 2) || '-' || substr(eligibility_start_date, 1, 2),'+1 day')  <  '2022-05-01')".format(tableName=table)
+        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where ( eligibility_end_date  >= '2022-04-01' and  eligibility_start_date < '2022-05-01') or (substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 4, 2) || '-' || substr(eligibility_end_date, 1, 2)  >= '2022-04-01' and substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 4, 2) || '-' ||                        substr(eligibility_start_date, 1, 2)  <  '2022-05-01')".format(tableName=table)
         
         tableCursor.execute(sqlQuery)
         while True:
