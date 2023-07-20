@@ -64,7 +64,7 @@ class StdMemberInfoTableCreate:
    
     def __insertAll(self,batchList):
         sql = """
-            INSERT OR REPLACE INTO std_member_info (member_id,member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code,payer)
+            INSERT OR IGNORE INTO std_member_info (member_id,member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code,payer)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         """
         self.cursor.executemany(sql,batchList)  
