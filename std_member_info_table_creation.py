@@ -44,7 +44,7 @@ class StdMemberInfoTableCreate:
         self.cursor.execute(sql)
     
     def insertData(self,table,tableCursor):
-        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where ( DATE(eligibility_end_date)  >= '2022-04-01' and  DATE(eligibility_start_date) < '2022-05-01') or (DATE(substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 4, 2) || '-' || substr(eligibility_end_date, 1, 2))  >= '2022-04-01' and DATE(substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 4, 2) || '-' || substr(eligibility_start_date, 1, 2))  <  '2022-05-01')".format(tableName=table)
+        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where ( DATE(eligibility_end_date,'+1 day')  >= '2022-04-01' and  DATE(eligibility_start_date,'+1 day') < '2022-05-01') or (DATE(substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 4, 2) || '-' || substr(eligibility_end_date, 1, 2),'+1 day')  >= '2022-04-01' and DATE(substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 4, 2) || '-' || substr(eligibility_start_date, 1, 2),'+1 day')  <  '2022-05-01')".format(tableName=table)
         
         tableCursor.execute(sqlQuery)
         while True:
@@ -100,7 +100,7 @@ def getAverageSocialIsolationScore(cursor):
     return cursor.execute("SELECT AVG(social_isolation_score) from (SELECT  *, social_isolation_score as social_isolation_score from std_member_info left join model_scores_by_zip on zip_code =zcta group by member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code, payer )  ").fetchone()[0]
 
 def getMembersWithMaxAlogrexSdohCompositeScore(cursor):
-    return cursor.execute(" SELECT *, algorex_sdoh_composite_score as composite_score from std_member_info left join interview.model_scores_by_zip on zip_code = zcta where algorex_sdoh_composite_score = (SELECT MAX( algorex_sdoh_composite_score) FROM model_scores_by_zip) group by member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code, payer").fetchall()       
+    return cursor.execute(" SELECT std_member_info.*, algorex_sdoh_composite_score as composite_score from std_member_info left join interview.model_scores_by_zip on zip_code = zcta where algorex_sdoh_composite_score = (SELECT MAX( algorex_sdoh_composite_score) FROM model_scores_by_zip) group by member_first_name,member_last_name, date_of_birth,main_address,city,state,zip_code, payer").fetchall()       
 
 
 def getStdMemberInfoTableAnalysis(cursor):
@@ -112,9 +112,9 @@ def getStdMemberInfoTableAnalysis(cursor):
     print("4. The number of members thst live in a zip code with a food_access_score lower than 2 is {}.".format(getMembersWithAFoodAccessScoreLowerThanTwoCount(cursor)))
     print("5. The average social isolation score is {}.".format(getAverageSocialIsolationScore(cursor)))
     membersWithMaxAlgorexScoreRowData = getMembersWithMaxAlogrexSdohCompositeScore(cursor)
-    print("6. The highest algorex_sdoh_composite_score is {} in zip code {}. The members with the highest algorex_sdoh_composite_score are: ".format(membersWithMaxAlgorexScoreRowData[0][-1],membersWithMaxAlgorexScoreRowData[0][-2]))
+    print("6. The highest algorex_sdoh_composite_score is {} in zip code {}. The members with the highest algorex_sdoh_composite_score are: ".format(membersWithMaxAlgorexScoreRowData[0][-1],membersWithMaxAlgorexScoreRowData[0][-3]))
     for row in membersWithMaxAlgorexScoreRowData:
-        memberInformation = "\t\tMemberId: {}, FirstName: {}, LastName: {}, DOB: {}, MainAddress: {}, City: {}, State: {}, Payer: {}".format(*row)
+        memberInformation = "\t\tMemberId: {}, FirstName: {}, LastName: {}, DOB: {}, MainAddress: {}, City: {}, State: {}".format(*row)
         print(memberInformation)
     
 if __name__ == '__main__':
