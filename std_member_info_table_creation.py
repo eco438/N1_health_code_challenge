@@ -44,7 +44,7 @@ class StdMemberInfoTableCreate:
         self.cursor.execute(sql)
     
     def insertData(self,table,tableCursor):
-        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where ( DATE(eligibility_end_date)  >= '2022-04-01' and  DATE(eligibility_start_date) < '2022-05-01') or ( DATE(substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 4, 2) || '-' || substr(eligibility_end_date, 1, 2))  >= '2022-04-01' and DATE(substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 4, 2) || '-' || substr(eligibility_start_date, 1, 2))  <  '2022-05-01')".format(tableName=table)
+        sqlQuery = "SELECT first_name, last_name, dob, street_address,city,state,zip,payer from {tableName} where (eligibility_end_date LIKE '____-__-__' and  eligibility_end_date  >= '2022-04-01' and  eligibility_start_date <= '2022-04-30') or ( eligibility_end_date LIKE '__/__/____' and substr(eligibility_end_date, 7, 4) || '-' || substr(eligibility_end_date, 1, 2) || '-' || substr(eligibility_end_date, 4, 2)  >= '2022-04-01' and substr(eligibility_start_date, 7, 4) || '-' || substr(eligibility_start_date, 1, 2) || '-' || substr(eligibility_start_date, 4, 2)  <=  '2022-04-30')".format(tableName=table)
         
         tableCursor.execute(sqlQuery)
         while True:
@@ -75,9 +75,11 @@ def createTableAndInsertData(stdMemberInfoTableCreate):
     stdMemberInfoTableCreate.createTable()
     with sqlite3.connect("interview.db") as connection:
         cur = connection.cursor()
+        
         table_list = [table for table in cur.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
         roster_table = [table_list[i][0] for i in range(1,len(table_list))]
         for roster in roster_table:
+        
             stdMemberInfoTableCreate.insertData(roster,cur)
         cur.close
     print("\n")
@@ -124,11 +126,12 @@ if __name__ == '__main__':
             stdMemberInfoTableCreate.deleteTable()
             print("Creating std member info table and inserting data into the table.")
             createTableAndInsertData(stdMemberInfoTableCreate)
-        
+    
         print("Analysis of std member info table.")
         conn.execute('ATTACH DATABASE ? AS interview',("interview.db",))
         cursor = conn.cursor()
         getStdMemberInfoTableAnalysis(cursor)
         cursor.close()
+        
         
     
